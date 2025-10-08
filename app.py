@@ -1,13 +1,17 @@
 # app.py
 
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
 import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 # 引入我們自定義的模組
 from data_utils import generate_and_prepare_data
 from linear_regression import LinearRegression
+
+plt.rcParams["font.family"] = "sans-serif"
+plt.rcParams["axes.unicode_minus"] = False  # 確保負號可以正常顯示
 
 
 # --- 輔助函數 (用於計算評估指標) ---

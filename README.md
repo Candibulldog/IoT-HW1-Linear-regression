@@ -1,2 +1,36 @@
-# IoT-HW1-Linear-regression
-Write python to solve simple linear regression problem, following CRISP-DM steps.
+# 互動式線性迴歸視覺化工具
+
+此專案是一個 Streamlit Web 應用程式，允許使用者互動式地視覺化一個從零開始實作的線性迴歸模型。
+
+## 專案特色
+
+- **互動式參數調整**：使用者可以透過側邊欄調整數據點數量、雜訊等級、學習率等參數。
+- **即時視覺化**：即時顯示數據分佈、模型預測線以及成本函數的收斂過程。
+- **從零實作**：底層的線性迴歸模型 (`linear_regression.py`) 完全使用 NumPy 從零開始打造，未使用現成的機器學習框架（如 Scikit-learn）來訓練模型。
+
+## 檔案結構
+
+- `app.py`: Streamlit 應用程式的主程式。
+- `linear_regression.py`: 從零實作的線性迴歸模型類別。
+- `data_utils.py`: 用於生成和準備數據的工具函數。
+- `requirements.txt`: 專案所需的 Python 依賴套件。
+
+## 如何執行
+
+1.  **環境設定**
+    請確認你已安裝 Python 3.7+。建議使用虛擬環境。
+
+2.  **安裝依賴套件**
+    在終端機中，導航至專案根目錄，然後執行以下指令：
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **啟動應用程式**
+    安裝完所有套件後，執行以下指令：
+    ```bash
+    streamlit run app.py
+    ```
+
+4.  **開啟瀏覽器**
+    執行成功後，終端機會顯示一個本地網址 (通常是 `http://localhost:8501`)，請在瀏覽器中開啟此網址。

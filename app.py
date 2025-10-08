@@ -5,145 +5,145 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-# 引入我們自定義的模組
+# Import our custom modules
 from data_utils import generate_and_prepare_data
 from linear_regression import LinearRegression
 
+# Set Matplotlib parameters to prevent font issues
 plt.rcParams["font.family"] = "sans-serif"
-plt.rcParams["axes.unicode_minus"] = False  # 確保負號可以正常顯示
+plt.rcParams["axes.unicode_minus"] = False  # Ensure minus sign is displayed correctly
 
 
-# --- 輔助函數 (用於計算評估指標) ---
+# --- Helper functions for evaluation metrics ---
 def mean_squared_error(y_true, y_pred):
-    """計算均方誤差 (MSE)"""
+    """Calculates Mean Squared Error (MSE)"""
     return np.mean((y_true - y_pred) ** 2)
 
 
 def r2_score(y_true, y_pred):
-    """計算 R-squared (R2 Score)"""
+    """Calculates R-squared (R2 Score)"""
     corr_matrix = np.corrcoef(y_true.flatten(), y_pred.flatten())
     corr = corr_matrix[0, 1]
     return corr**2
 
 
-# --- Streamlit 應用程式介面 ---
+# --- Streamlit App Interface ---
 
 st.set_page_config(layout="wide")
 
-# 1. 標題
-st.title("📈 互動式線性迴歸視覺化工具")
+# 1. Title
+st.title("📈 Interactive Linear Regression Visualizer")
 st.markdown(
-    "這個工具讓你從零開始探索線性迴歸。你可以在左側的側邊欄調整參數，觀察模型的變化。"
+    "This tool lets you explore Linear Regression from scratch. Adjust the parameters on the left sidebar to see how the model changes."
 )
 
-# 2. 側邊欄：參數控制
-st.sidebar.header("⚙️ 參數設定")
+# 2. Sidebar for parameter controls
+st.sidebar.header("⚙️ Parameters")
 
-st.sidebar.subheader("📊 數據生成參數")
-n_samples = st.sidebar.slider("數據點數量 (N)", 50, 500, 100, 10)
-slope = st.sidebar.slider("真實斜率 (w)", -5.0, 5.0, 2.0, 0.1)
-intercept = st.sidebar.slider("真實截距 (b)", -10.0, 10.0, 5.0, 0.5)
-noise_level = st.sidebar.slider("雜訊等級", 0.0, 50.0, 20.0, 1.0)
+st.sidebar.subheader("📊 Data Generation")
+n_samples = st.sidebar.slider("Number of samples (N)", 50, 500, 100, 10)
+slope = st.sidebar.slider("True slope (w)", -5.0, 5.0, 2.0, 0.1)
+intercept = st.sidebar.slider("True intercept (b)", -10.0, 10.0, 5.0, 0.5)
+noise_level = st.sidebar.slider("Noise level", 0.0, 50.0, 20.0, 1.0)
 
-st.sidebar.subheader("🧠 模型訓練參數")
+st.sidebar.subheader("🧠 Model Training")
 learning_rate = st.sidebar.select_slider(
-    "學習率 (Learning Rate)", options=[0.0001, 0.001, 0.01, 0.1, 1.0], value=0.01
+    "Learning Rate", options=[0.0001, 0.001, 0.01, 0.1, 1.0], value=0.01
 )
-n_iterations = st.sidebar.slider("迭代次數", 100, 3000, 1000, 100)
+n_iterations = st.sidebar.slider("Number of iterations", 100, 3000, 1000, 100)
 
-# 3. 數據準備與模型訓練
-# 根據側邊欄的參數生成數據
+# 3. Data preparation and model training
+# Generate data based on sidebar parameters
 X_train, X_test, y_train, y_test, scaler = generate_and_prepare_data(
     n_samples=n_samples, slope=slope, intercept=intercept, noise_level=noise_level
 )
 
-# 建立並訓練模型
+# Create and train the model
 model = LinearRegression(learning_rate=learning_rate, n_iterations=n_iterations)
 model.fit(X_train, y_train)
 
-# 進行預測
+# Make predictions
 y_pred_test = model.predict(X_test)
 
-# 4. 顯示結果
-st.header("✨ 結果與分析")
+# 4. Display results
+st.header("✨ Results and Analysis")
 
 col1, col2 = st.columns((1, 1))
 
 with col1:
-    # 步驟 3: 監控收斂過程
-    st.subheader("📉 成本函數收斂過程")
+    # Step 3: Monitor convergence
+    st.subheader("📉 Cost Function Convergence")
 
     fig_cost, ax_cost = plt.subplots()
     ax_cost.plot(range(model.n_iterations), model.cost_history)
-    ax_cost.set_xlabel("迭代次數 (Iterations)")
-    ax_cost.set_ylabel("成本 (Cost - MSE)")
+    ax_cost.set_xlabel("Iterations")
+    ax_cost.set_ylabel("Cost (MSE)")
     ax_cost.set_title("Cost Function over Iterations")
     sns.despine(fig=fig_cost)
     st.pyplot(fig_cost)
 
     st.markdown("""
-    上圖顯示了隨著訓練的進行，模型的成本（誤差）如何逐漸降低。
-    一個理想的學習率會讓這條曲線平滑地下降並收斂。
-    - 如果曲線下降太慢，可以嘗試**提高學習率**。
-    - 如果曲線劇烈震盪或發散，表示學習率太高，需要**降低學習率**。
+    The plot above shows how the model's cost (error) decreases as training progresses.
+    An ideal learning rate will result in a smooth, downward-sloping curve.
+    - If the curve decreases too slowly, try **increasing the learning rate**.
+    - If the curve fluctuates wildly or diverges, the learning rate is too high and you should **decrease it**.
     """)
 
 with col2:
-    # 步驟 4: 評估與視覺化預測
-    st.subheader("🎯 預測結果視覺化")
+    # Step 4: Evaluate and visualize predictions
+    st.subheader("🎯 Prediction Visualization")
 
     fig_pred, ax_pred = plt.subplots()
-    # 原始數據點 (測試集)
+    # Original data points (test set)
     ax_pred.scatter(
         scaler.inverse_transform(X_test),
         y_test,
         alpha=0.7,
-        label="真實值 (Actual Values)",
+        label="Actual Values",
     )
-    # 迴歸線
+    # Regression line
     ax_pred.plot(
         scaler.inverse_transform(X_test),
         y_pred_test,
         color="red",
         linewidth=2,
-        label="預測線 (Prediction)",
+        label="Prediction",
     )
-    ax_pred.set_xlabel("特徵 (Feature X)")
-    ax_pred.set_ylabel("目標 (Target y)")
+    ax_pred.set_xlabel("Feature X")
+    ax_pred.set_ylabel("Target y")
     ax_pred.set_title("Prediction vs. Actual Values")
     ax_pred.legend()
     sns.despine(fig=fig_pred)
     st.pyplot(fig_pred)
 
     st.markdown("""
-    上圖展示了模型在**未見過的測試數據**上的表現。
-    - **藍點**是真實的數據分佈。
-    - **紅線**是我們的模型學習到的線性關係。
-    紅線越能貼近藍點的分佈趨勢，代表模型學得越好。
+    This plot shows the model's performance on the **unseen test data**.
+    - The **blue dots** represent the actual data points.
+    - The **red line** is the linear relationship learned by our model.
+    The closer the red line fits the trend of the blue dots, the better the model's performance.
     """)
 
-# 步驟 4: 計算評估指標
-st.subheader("📝 模型評估指標")
+# Step 4: Calculate evaluation metrics
+st.subheader("📝 Model Evaluation Metrics")
 mse = mean_squared_error(y_test, y_pred_test)
 r2 = r2_score(y_test, y_pred_test)
 
 metric1, metric2, metric3, metric4 = st.columns(4)
-metric1.metric(label="均方誤差 (MSE)", value=f"{mse:.2f}")
+metric1.metric(label="Mean Squared Error (MSE)", value=f"{mse:.2f}")
 metric2.metric(label="R-squared (R² Score)", value=f"{r2:.4f}")
 
 st.info(
-    f"模型學習到的權重 (w): **{model.weights[0][0]:.4f}** | 學習到的偏置 (b): **{model.bias:.4f}**",
+    f"Learned weight (w): **{model.weights[0][0]:.4f}** | Learned bias (b): **{model.bias:.4f}**",
     icon="🧠",
 )
 
 
-st.header("📜 結論")
+st.header("📜 Conclusion")
 st.markdown("""
-這個互動工具展示了線性迴歸的核心流程。透過調整左側的參數，我們可以觀察到：
-1.  **數據特性**：增加 `雜訊等級` 會讓數據點更分散，模型更難找到最佳擬合線，導致 R² 分數下降。
-2.  **模型訓練**：`學習率` 和 `迭代次數` 直接影響模型的收斂效果。不恰當的學習率會導致成本無法有效降低。
-3.  **從零實作**：我們底層使用的 `LinearRegression` 類別是完全從零打造的，成功實現了梯度下降的優化過程。
+This interactive tool demonstrates the core workflow of linear regression. By adjusting the parameters, we can observe the following:
+1.  **Data Characteristics**: Increasing the `Noise level` makes the data points more scattered, making it harder for the model to find the best fit and lowering the R² score.
+2.  **Model Training**: The `Learning Rate` and `Number of iterations` directly impact the model's convergence. An improper learning rate can prevent the cost from decreasing effectively.
+3.  **Implementation from Scratch**: The underlying `LinearRegression` class was built entirely from scratch, successfully implementing the gradient descent optimization process.
 
-我們已經成功完成了 `Todo.md` 中定義的所有主要步驟！
+We have now completed all the main steps defined in the `Todo.md` file!
 """)
